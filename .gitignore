@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.so
+*.o
+*.ann
+data/siftsmall/
+data/*.tar.gz
+annlite-data/
+.DS_Store

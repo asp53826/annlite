@@ -1,0 +1,40 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -r requirements-dev.txt
+      # ubuntu runners are x86, macos runners are arm. between them this
+      # exercises both the AVX and the NEON distance kernels.
+      - run: make PYTHON=python
+      - run: python -c "import sys; sys.path.insert(0,'python'); import _annlite; print('simd:', _annlite.simd_backend())"
+      - run: python -m pytest tests -q
+
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: make PYTHON=python
+      - name: cache sift
+        uses: actions/cache@v4
+        with:
+          path: data/siftsmall
+          key: siftsmall-v1
+      - run: ./scripts/fetch_data.sh
+      - run: python bench/benchmark.py --dataset sift --ef 16,32,64,128
