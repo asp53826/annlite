@@ -1,0 +1,24 @@
+name: Verified Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  release-steward:
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: asp53826/portfolio-ops/.github/workflows/release-steward.yml@v1.0.0
+    with:
+      runtime: python
+      runtime-version: "3.12"
+      install-command: >-
+        python -m pip install -r requirements-dev.txt && make PYTHON=python
+      verify-command: >-
+        python -m pytest tests -q
