@@ -1,0 +1,4 @@
+# GitHub language stats: the index itself is C++17 (src/). Python here is the
+# test suite and the benchmark harness, so keep them out of the language bar.
+tests/** linguist-vendored
+bench/** linguist-vendored
